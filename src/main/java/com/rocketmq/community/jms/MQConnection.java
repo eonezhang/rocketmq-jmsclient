@@ -3,6 +3,8 @@ package com.rocketmq.community.jms;
 import javax.jms.*;
 
 public class MQConnection implements Connection, TopicConnection, QueueConnection {
+    private ExceptionListener exceptionListener;
+
     // Implement Connection
 
     @Override
