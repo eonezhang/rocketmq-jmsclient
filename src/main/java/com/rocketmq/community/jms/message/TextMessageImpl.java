@@ -23,6 +23,12 @@ public class TextMessageImpl extends MessageBase implements TextMessage {
     }
 
     @Override
+    public void clearBody() throws JMSException {
+        super.clearBody();
+        text = null;
+    }
+
+    @Override
     public Message convert() throws JMSException {
         if (text == null) {
             return null;

@@ -4,7 +4,9 @@ import com.alibaba.rocketmq.broker.BrokerStartup;
 import com.alibaba.rocketmq.namesrv.NamesrvStartup;
 import com.rocketmq.community.jms.helper.JmsConsumerAsync;
 import com.rocketmq.community.jms.helper.JmsProducer;
+import com.rocketmq.community.jms.message.BytesMessageImpl;
 import com.rocketmq.community.jms.message.MapMessageImpl;
+import com.rocketmq.community.jms.message.StreamMessageImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,6 +52,22 @@ public class TestJmsClient {
         Assert.assertNull(((MapMessageImpl)messageListener.getMessage()).getString("NONE"));
         Assert.assertEquals(0.0, ((MapMessageImpl)messageListener.getMessage()).getDouble("NONE"), 0);
 
+    }
+
+    @Test
+    public void TestSendBytesMessagge_MultiThread() throws JMSException {
+        sendReceiveMessageMultiThread(MessageType.BytesMessage);
+
+        Assert.assertEquals((double) producer.double1, ((BytesMessageImpl) messageListener.getMessage()).readDouble(), 0);
+        Assert.assertEquals((double)producer.double2, ((BytesMessageImpl)messageListener.getMessage()).readDouble(), 0);
+    }
+
+    @Test
+    public void TestSendStreamMessagge_MultiThread() throws JMSException {
+        sendReceiveMessageMultiThread(MessageType.StreamMessage);
+
+        Assert.assertEquals((double)producer.double1, ((StreamMessageImpl)messageListener.getMessage()).readDouble(), 0);
+        Assert.assertEquals((double)producer.double2, ((StreamMessageImpl)messageListener.getMessage()).readDouble(), 0);
     }
 
     private void sendReceiveMessageMultiThread(final MessageType msgType) {

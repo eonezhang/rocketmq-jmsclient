@@ -1,13 +1,16 @@
 package com.rocketmq.community.jms.message;
 
 import com.alibaba.rocketmq.common.message.Message;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.JMSException;
+import javax.jms.MessageEOFException;
+import javax.jms.MessageFormatException;
 import java.io.*;
 
 public abstract class SequenceMessageImpl extends MessageBase {
-    public static final byte NULL = 0;
-    public static final byte BOOLEAN_TYPE = 1;
+    public static final byte NULL = 1;
+    public static final byte BOOLEAN_TYPE = 14;
     public static final byte BYTE_TYPE = 2;
     public static final byte CHAR_TYPE = 3;
     public static final byte SHORT_TYPE = 4;
@@ -76,13 +79,18 @@ public abstract class SequenceMessageImpl extends MessageBase {
 
     public double readDouble() throws JMSException {
         initializeReading();
-
+        double value;
         try {
-            preReadProcess();
-            return dataIn.readDouble();
+            value = this.dataIn.readDouble();
         } catch (IOException ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
+
+        if (value == -1) {
+            throw new MessageEOFException("reached end of data");
+        }
+
+        return value;
     }
 
     public String readUTF() throws JMSException {
@@ -132,7 +140,7 @@ public abstract class SequenceMessageImpl extends MessageBase {
             preWriteProcess(DOUBLE_TYPE);
             dataOut.writeDouble(value);
         } catch (IOException ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
     }
 
@@ -175,8 +183,10 @@ public abstract class SequenceMessageImpl extends MessageBase {
     protected void preWriteProcess(Byte valueType) throws IOException {
     }
 
-    protected int preReadProcess() throws IOException {
-        return dataIn.read();
+    @Override
+    public void clearBody() throws JMSException {
+        super.clearBody();
+        content = null;
     }
 
     @Override

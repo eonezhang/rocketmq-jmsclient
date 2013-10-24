@@ -10,6 +10,7 @@ public abstract class MessageBase implements javax.jms.Message {
     private Destination destination;
     final static public String JMS_SOURCE = "JMS_SOURCE";
     final static public String MSG_TYPE_NAME = "MSG_TYPE";
+    protected boolean readOnly;
 
     @Override
     public String getJMSMessageID() throws JMSException {
@@ -233,7 +234,7 @@ public abstract class MessageBase implements javax.jms.Message {
 
     @Override
     public void clearBody() throws JMSException {
-        //To change body of implemented methods use File | Settings | File Templates.
+        readOnly = false;
     }
 
     public abstract Message convert() throws JMSException ;

@@ -1,9 +1,13 @@
 package com.rocketmq.community.jms.message;
 
 import com.alibaba.rocketmq.common.message.Message;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.JMSException;
+import javax.jms.MessageEOFException;
+import javax.jms.MessageFormatException;
 import javax.jms.StreamMessage;
+import java.io.EOFException;
 import java.io.IOException;
 
 public class StreamMessageImpl extends SequenceMessageImpl implements StreamMessage {
@@ -13,17 +17,6 @@ public class StreamMessageImpl extends SequenceMessageImpl implements StreamMess
 
     public StreamMessageImpl(byte[] content) {
         super(content);
-    }
-
-    @Override
-    public double readDouble() throws JMSException {
-        initializeReading();
-
-        try {
-            return dataIn.readDouble();
-        } catch (IOException ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
-        }
     }
 
     @Override
@@ -41,6 +34,35 @@ public class StreamMessageImpl extends SequenceMessageImpl implements StreamMess
         //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    public double readDouble() throws JMSException {
+        initializeReading();
+
+        try {
+            int type = dataIn.read();
+
+            if (type == -1) {
+                throw new MessageEOFException("reached end of data");
+            }
+            if (type == DOUBLE_TYPE) {
+                return this.dataIn.readDouble();
+            }
+            if (type == FLOAT_TYPE) {
+                return this.dataIn.readFloat();
+            }
+            if (type == STRING_TYPE) {
+                return Double.valueOf(this.dataIn.readUTF()).doubleValue();
+            }
+            if (type == NULL) {
+                this.dataIn.reset();
+                throw new NullPointerException("Cannot convert NULL value to double.");
+            } else {
+                this.dataIn.reset();
+                throw new MessageFormatException(" not a double type");
+            }
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+    }
     @Override
     protected void preWriteProcess(Byte valueType) throws IOException {
         dataOut.writeByte(valueType);

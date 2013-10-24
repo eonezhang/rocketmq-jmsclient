@@ -9,12 +9,16 @@ import java.util.Random;
 public class JmsProducer {
 
     public final String textMessage = "Test Text Message";
+
     public final String mapAcctId = "acctId";
     public final Long mapAcctIdValue = 12345l;
     public final String mapSide = "side";
     public final String mapSideValue = "SELL";
     public final String mapShares = "shares";
     public final Double mapSharesValue = 250.0;
+
+    public final Double double1 = 11.0;
+    public final Double double2 = 12.33;
 
     public void sendTextMessage() {
         MessageCreator msg = new MessageCreator() {
@@ -46,8 +50,8 @@ public class JmsProducer {
         MessageCreator msg = new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 BytesMessage msg = session.createBytesMessage();
-                msg.writeDouble(11.33);
-                msg.writeDouble(22.44);
+                msg.writeDouble(double1);
+                msg.writeDouble(double2);
                 return msg;
             }
         };
@@ -59,8 +63,8 @@ public class JmsProducer {
         MessageCreator msg = new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 StreamMessage msg = session.createStreamMessage();
-                msg.writeDouble(11.33);
-                msg.writeDouble(22.44);
+                msg.writeDouble(double1);
+                msg.writeDouble(double2);
                 return msg;
             }
         };

@@ -283,6 +283,12 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
     }
 
     @Override
+    public void clearBody() throws JMSException {
+        super.clearBody();
+        map = null;
+    }
+
+    @Override
     public Message convert() throws JMSException {
         Message message = new Message(this.getJMSDestination().toString(), // topic
                 JMS_SOURCE,  // tag

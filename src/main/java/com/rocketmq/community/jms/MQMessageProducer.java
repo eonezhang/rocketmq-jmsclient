@@ -2,6 +2,7 @@ package com.rocketmq.community.jms;
 
 import com.alibaba.rocketmq.client.producer.MQProducer;
 import com.rocketmq.community.jms.message.MessageBase;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -88,7 +89,7 @@ public class MQMessageProducer implements MessageProducer {
         try {
             targetProducer.send(convertedMsg);
         } catch (Exception ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
     }
 

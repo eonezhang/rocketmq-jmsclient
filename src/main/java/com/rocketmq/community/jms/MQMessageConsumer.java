@@ -7,6 +7,7 @@ import com.alibaba.rocketmq.common.message.MessageExt;
 import com.alibaba.rocketmq.common.message.MessageQueue;
 import com.alibaba.rocketmq.remoting.protocol.RemotingSerializable;
 import com.rocketmq.community.jms.message.*;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -33,7 +34,7 @@ public class MQMessageConsumer implements MessageConsumer {
             mqs = new MessageQueue[1];
             mqs = targetConsumer.fetchSubscribeMessageQueues(topic).toArray(mqs);
         } catch (MQClientException ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
     }
 

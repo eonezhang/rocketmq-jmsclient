@@ -10,6 +10,7 @@ import com.rocketmq.community.jms.message.BytesMessageImpl;
 import com.rocketmq.community.jms.message.MapMessageImpl;
 import com.rocketmq.community.jms.message.StreamMessageImpl;
 import com.rocketmq.community.jms.message.TextMessageImpl;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.*;
 import java.io.Serializable;
@@ -133,7 +134,7 @@ public class MQSession implements Session, QueueSession {
             producer.start();
             return new MQMessageProducer(producer, destination);
         } catch (Exception ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
     }
 
@@ -158,7 +159,7 @@ public class MQSession implements Session, QueueSession {
         try {
             target.start();
         } catch (MQClientException ex) {
-            throw new JMSException(ex.getMessage() + "\nStack: " + ex.getStackTrace());
+            throw JMSExceptionSupport.create(ex);
         }
         return new MQMessageConsumer(target, destination.toString());
     }
