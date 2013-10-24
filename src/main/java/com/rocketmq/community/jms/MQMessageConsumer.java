@@ -75,7 +75,6 @@ public class MQMessageConsumer implements MessageConsumer {
             }
 
             if (pullResult != null) {
-                System.out.println(pullResult);
                 putMessageQueueOffset(mq, pullResult.getNextBeginOffset());
                 switch (pullResult.getPullStatus()) {
                     case FOUND:

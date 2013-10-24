@@ -2,6 +2,7 @@ package com.rocketmq.community.jms.message;
 
 import com.alibaba.rocketmq.common.message.Message;
 import com.alibaba.rocketmq.remoting.protocol.RemotingSerializable;
+import com.rocketmq.community.jms.util.RemotingSerializableEx;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
@@ -142,18 +143,6 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
         if (value instanceof Float) {
             return ((Float)value).floatValue();
         }
-        if (value instanceof Long) {
-            return ((Long)value).floatValue();
-        }
-        if (value instanceof Integer) {
-            return ((Integer)value).floatValue();
-        }
-        if (value instanceof Short) {
-            return ((Short)value).floatValue();
-        }
-        if (value instanceof Byte) {
-            return ((Byte)value).floatValue();
-        }
         if (value instanceof String) {
             return Float.valueOf(value.toString()).floatValue();
         } else {
@@ -172,18 +161,6 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
         }
         if (value instanceof Float) {
             return ((Float)value).doubleValue();
-        }
-        if (value instanceof Long) {
-            return ((Long)value).doubleValue();
-        }
-        if (value instanceof Integer) {
-            return ((Integer)value).doubleValue();
-        }
-        if (value instanceof Short) {
-            return ((Short)value).doubleValue();
-        }
-        if (value instanceof Byte) {
-            return ((Byte)value).doubleValue();
         }
         if (value instanceof String) {
             return Double.valueOf(value.toString()).doubleValue();
@@ -309,7 +286,7 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
     public Message convert() throws JMSException {
         Message message = new Message(this.getJMSDestination().toString(), // topic
                 JMS_SOURCE,  // tag
-                RemotingSerializable.encode(map));  // body
+                RemotingSerializableEx.encodeWithClass(map));  // body
         message.putProperty(MSG_TYPE_NAME, MessageTypeEnum.MapMessage.toString());
         return message;
     }

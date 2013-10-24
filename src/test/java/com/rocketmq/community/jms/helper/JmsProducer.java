@@ -9,6 +9,12 @@ import java.util.Random;
 public class JmsProducer {
 
     public final String textMessage = "Test Text Message";
+    public final String mapAcctId = "acctId";
+    public final Long mapAcctIdValue = 12345l;
+    public final String mapSide = "side";
+    public final String mapSideValue = "SELL";
+    public final String mapShares = "shares";
+    public final Double mapSharesValue = 250.0;
 
     public void sendTextMessage() {
         MessageCreator msg = new MessageCreator() {
@@ -26,9 +32,9 @@ public class JmsProducer {
         MessageCreator msg = new MessageCreator() {
             public Message createMessage(Session session) throws JMSException {
                 MapMessage msg = session.createMapMessage();
-                msg.setLong("acctId", 12345);
-                msg.setString("side", "SELL");
-                msg.setDouble("shares", 250.0);
+                msg.setLong(mapAcctId, mapAcctIdValue);
+                msg.setString(mapSide, mapSideValue);
+                msg.setDouble(mapShares, mapSharesValue);
                 return msg;
             }
         };

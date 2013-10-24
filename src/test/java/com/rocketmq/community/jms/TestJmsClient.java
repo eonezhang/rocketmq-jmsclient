@@ -4,6 +4,7 @@ import com.alibaba.rocketmq.broker.BrokerStartup;
 import com.alibaba.rocketmq.namesrv.NamesrvStartup;
 import com.rocketmq.community.jms.helper.JmsConsumerAsync;
 import com.rocketmq.community.jms.helper.JmsProducer;
+import com.rocketmq.community.jms.message.MapMessageImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -33,14 +34,22 @@ public class TestJmsClient {
 
 
     @Test
-    public void TestSendTextMessagge_MultiThread() {
+    public void TestSendTextMessagge_MultiThread() throws JMSException {
         sendReceiveMessageMultiThread(MessageType.TextMessage);
 
-        try {
-            Assert.assertEquals(producer.textMessage, ((TextMessage)messageListener.getMessage()).getText());
-        } catch (JMSException ex) {
-            System.out.println(ex.getMessage() + "\nStack: " + ex.getStackTrace());
-        }
+        Assert.assertEquals(producer.textMessage, ((TextMessage)messageListener.getMessage()).getText());
+    }
+
+    @Test
+    public void TestSendMapMessagge_MultiThread() throws JMSException {
+        sendReceiveMessageMultiThread(MessageType.MapMessage);
+
+        Assert.assertEquals(producer.mapSideValue, ((MapMessageImpl)messageListener.getMessage()).getString(producer.mapSide));
+        Assert.assertEquals((long)producer.mapAcctIdValue, ((MapMessageImpl)messageListener.getMessage()).getLong(producer.mapAcctId));
+        Assert.assertEquals((double)producer.mapSharesValue, ((MapMessageImpl)messageListener.getMessage()).getDouble(producer.mapShares), 0);
+        Assert.assertNull(((MapMessageImpl)messageListener.getMessage()).getString("NONE"));
+        Assert.assertEquals(0.0, ((MapMessageImpl)messageListener.getMessage()).getDouble("NONE"), 0);
+
     }
 
     private void sendReceiveMessageMultiThread(final MessageType msgType) {
@@ -72,7 +81,7 @@ public class TestJmsClient {
                         messageListener.getLock().wait(timeout);
                         messageListener.setMessage(null);
                         long end = System.currentTimeMillis();
-                        if (end - start > timeout) {
+                        if (end - start >= timeout) {
                             queueEmpty = true;
                             break;
                         }
