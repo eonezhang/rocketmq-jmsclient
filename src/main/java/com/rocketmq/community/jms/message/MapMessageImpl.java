@@ -19,7 +19,8 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
 
     }
 
-    public MapMessageImpl(Map<String, Object> map) {
+    public MapMessageImpl(Map<String, Object> map, boolean readOnly) {
+        this.readOnly = readOnly;
         this.map = map;
     }
 

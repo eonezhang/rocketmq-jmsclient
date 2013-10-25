@@ -9,8 +9,8 @@ import javax.jms.MessageFormatException;
 import java.io.*;
 
 public abstract class SequenceMessageImpl extends MessageBase {
-    public static final byte NULL = 1;
-    public static final byte BOOLEAN_TYPE = 14;
+    public static final byte NULL = 0;
+    public static final byte BOOLEAN_TYPE = 1;
     public static final byte BYTE_TYPE = 2;
     public static final byte CHAR_TYPE = 3;
     public static final byte SHORT_TYPE = 4;
@@ -27,38 +27,89 @@ public abstract class SequenceMessageImpl extends MessageBase {
     protected DataOutputStream dataOut;
     protected ByteArrayOutputStream bytesOut;
     protected DataInputStream dataIn;
-    private byte[] content;
+    protected byte[] content;
 
-    protected SequenceMessageImpl(byte[] content) {
+    protected SequenceMessageImpl(byte[] content, boolean readOnly) {
         setContent(content);
+        this.readOnly = readOnly;
     }
 
     public void setContent(byte[] content) {
         this.content = content;
     }
 
-    public long getBodyLength() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
-    }
-
     public boolean readBoolean() throws JMSException {
-        return false;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        boolean value;
+        try {
+            value = this.dataIn.readBoolean();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public byte readByte() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        byte value;
+
+        try {
+            value = this.dataIn.readByte();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public int readUnsignedByte() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        int value;
+
+        try {
+            value = this.dataIn.readUnsignedByte();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public short readShort() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        short value;
+
+        try {
+            value = this.dataIn.readShort();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public int readUnsignedShort() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        int value;
+
+        try {
+            value = this.dataIn.readUnsignedShort();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public char readChar() throws JMSException {
@@ -66,28 +117,60 @@ public abstract class SequenceMessageImpl extends MessageBase {
     }
 
     public int readInt() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        int value;
+
+        try {
+            value = this.dataIn.readInt();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public long readLong() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        long value;
+
+        try {
+            value = this.dataIn.readLong();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public float readFloat() throws JMSException {
-        return 0;  //To change body of implemented methods use File | Settings | File Templates.
+        initializeReading();
+        float value;
+
+        try {
+            value = this.dataIn.readFloat();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
+        } catch (IOException ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+
+        return value;
     }
 
     public double readDouble() throws JMSException {
         initializeReading();
         double value;
+
         try {
             value = this.dataIn.readDouble();
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
         } catch (IOException ex) {
             throw JMSExceptionSupport.create(ex);
-        }
-
-        if (value == -1) {
-            throw new MessageEOFException("reached end of data");
         }
 
         return value;

@@ -110,17 +110,21 @@ public class MQMessageConsumer implements MessageConsumer {
         Message message = null;
         if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.TextMessage.toString())) {
             String content = new String(rawMessage.getBody());
-            message = new TextMessageImpl(content);
+            message = new TextMessageImpl(content, true);
         } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.MapMessage.toString())) {
             Map<String, Object> map = RemotingSerializable.decode(rawMessage.getBody(), HashMap.class);
-            message = new MapMessageImpl(map);
+            message = new MapMessageImpl(map, true);
         } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.BytesMessage.toString())) {
             if (rawMessage.getBody() != null) {
-                message = new BytesMessageImpl(rawMessage.getBody());
+                message = new BytesMessageImpl(rawMessage.getBody(), true);
             }
         } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.StreamMessage.toString())) {
             if (rawMessage.getBody() != null) {
-                message = new StreamMessageImpl(rawMessage.getBody());
+                message = new StreamMessageImpl(rawMessage.getBody(), true);
+            }
+        } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.ObjectMessage.toString())) {
+            if (rawMessage.getBody() != null) {
+                message = new ObjectMessageImpl(rawMessage.getBody(), true);
             }
         }
 

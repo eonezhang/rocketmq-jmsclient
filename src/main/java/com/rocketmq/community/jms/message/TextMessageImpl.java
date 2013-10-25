@@ -8,8 +8,9 @@ import javax.jms.TextMessage;
 public class TextMessageImpl extends MessageBase implements TextMessage {
     private String text;
 
-    public TextMessageImpl(String text) {
+    public TextMessageImpl(String text, boolean readOnly) {
         this.text = text;
+        this.readOnly = readOnly;
     }
 
     @Override

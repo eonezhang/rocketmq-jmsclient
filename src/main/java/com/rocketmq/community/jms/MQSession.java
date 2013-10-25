@@ -6,10 +6,7 @@ import com.alibaba.rocketmq.client.exception.MQClientException;
 import com.alibaba.rocketmq.client.producer.DefaultMQProducer;
 import com.alibaba.rocketmq.client.producer.MQProducer;
 import com.alibaba.rocketmq.client.producer.TransactionMQProducer;
-import com.rocketmq.community.jms.message.BytesMessageImpl;
-import com.rocketmq.community.jms.message.MapMessageImpl;
-import com.rocketmq.community.jms.message.StreamMessageImpl;
-import com.rocketmq.community.jms.message.TextMessageImpl;
+import com.rocketmq.community.jms.message.*;
 import com.rocketmq.community.jms.util.JMSExceptionSupport;
 
 import javax.jms.*;
@@ -43,7 +40,7 @@ public class MQSession implements Session, QueueSession {
 
     @Override
     public ObjectMessage createObjectMessage() throws JMSException {
-        throw new JMSException(Thread.currentThread().getStackTrace()[1].getMethodName() + ": Not supported");
+        return new ObjectMessageImpl();
     }
 
     @Override
@@ -63,7 +60,7 @@ public class MQSession implements Session, QueueSession {
 
     @Override
     public TextMessage createTextMessage(String text) throws JMSException {
-        TextMessageImpl message = new TextMessageImpl(text);
+        TextMessageImpl message = new TextMessageImpl(text, true);
         return message;
     }
 

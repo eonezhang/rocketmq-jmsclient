@@ -4,8 +4,10 @@ import com.alibaba.rocketmq.broker.BrokerStartup;
 import com.alibaba.rocketmq.namesrv.NamesrvStartup;
 import com.rocketmq.community.jms.helper.JmsConsumerAsync;
 import com.rocketmq.community.jms.helper.JmsProducer;
+import com.rocketmq.community.jms.helper.TestObject;
 import com.rocketmq.community.jms.message.BytesMessageImpl;
 import com.rocketmq.community.jms.message.MapMessageImpl;
+import com.rocketmq.community.jms.message.ObjectMessageImpl;
 import com.rocketmq.community.jms.message.StreamMessageImpl;
 import org.junit.Assert;
 import org.junit.Before;
@@ -46,6 +48,7 @@ public class TestJmsClient {
     public void TestSendMapMessagge_MultiThread() throws JMSException {
         sendReceiveMessageMultiThread(MessageType.MapMessage);
 
+        Assert.assertEquals((short)producer.mapDeptIdValue, ((MapMessageImpl)messageListener.getMessage()).getShort(producer.mapDeptId));
         Assert.assertEquals(producer.mapSideValue, ((MapMessageImpl)messageListener.getMessage()).getString(producer.mapSide));
         Assert.assertEquals((long)producer.mapAcctIdValue, ((MapMessageImpl)messageListener.getMessage()).getLong(producer.mapAcctId));
         Assert.assertEquals((double)producer.mapSharesValue, ((MapMessageImpl)messageListener.getMessage()).getDouble(producer.mapShares), 0);
@@ -68,6 +71,14 @@ public class TestJmsClient {
 
         Assert.assertEquals((double)producer.double1, ((StreamMessageImpl)messageListener.getMessage()).readDouble(), 0);
         Assert.assertEquals((double)producer.double2, ((StreamMessageImpl)messageListener.getMessage()).readDouble(), 0);
+    }
+
+    @Test
+    public void TestSendObjectMessagge_MultiThread() throws JMSException {
+        sendReceiveMessageMultiThread(MessageType.ObjectMessage);
+
+        Assert.assertEquals(producer.testObject.value, ((TestObject)((ObjectMessageImpl)messageListener.getMessage()).getObject()).value, 0);
+        Assert.assertEquals(producer.testObject.name, ((TestObject)((ObjectMessageImpl)messageListener.getMessage()).getObject()).name);
     }
 
     private void sendReceiveMessageMultiThread(final MessageType msgType) {
@@ -147,6 +158,9 @@ public class TestJmsClient {
                     break;
                 case MapMessage:
                     jmsProducer.sendMapMessage();
+                    break;
+                case ObjectMessage:
+                    jmsProducer.sendObjectMessage();
                     break;
                 default:
                     break;

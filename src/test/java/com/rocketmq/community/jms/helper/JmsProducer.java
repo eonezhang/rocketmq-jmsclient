@@ -16,9 +16,13 @@ public class JmsProducer {
     public final String mapSideValue = "SELL";
     public final String mapShares = "shares";
     public final Double mapSharesValue = 250.0;
+    public final String mapDeptId = "deptId";
+    public final Short mapDeptIdValue = 111;
 
     public final Double double1 = 11.0;
     public final Double double2 = 12.33;
+
+    public final TestObject testObject = new TestObject();
 
     public void sendTextMessage() {
         MessageCreator msg = new MessageCreator() {
@@ -39,6 +43,7 @@ public class JmsProducer {
                 msg.setLong(mapAcctId, mapAcctIdValue);
                 msg.setString(mapSide, mapSideValue);
                 msg.setDouble(mapShares, mapSharesValue);
+                msg.setShort(mapDeptId, mapDeptIdValue);
                 return msg;
             }
         };
@@ -65,6 +70,18 @@ public class JmsProducer {
                 StreamMessage msg = session.createStreamMessage();
                 msg.writeDouble(double1);
                 msg.writeDouble(double2);
+                return msg;
+            }
+        };
+
+        jmsTemplate.send(queueName, msg);
+    }
+
+    public void sendObjectMessage() {
+        MessageCreator msg = new MessageCreator() {
+            public Message createMessage(Session session) throws JMSException {
+                ObjectMessage msg = session.createObjectMessage();
+                msg.setObject(testObject);
                 return msg;
             }
         };

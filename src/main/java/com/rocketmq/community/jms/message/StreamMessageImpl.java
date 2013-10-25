@@ -12,11 +12,11 @@ import java.io.IOException;
 
 public class StreamMessageImpl extends SequenceMessageImpl implements StreamMessage {
     public StreamMessageImpl() {
-        super(null);
+        super(null, false);
     }
 
-    public StreamMessageImpl(byte[] content) {
-        super(content);
+    public StreamMessageImpl(byte[] content, boolean readOnly) {
+        super(content, readOnly);
     }
 
     @Override
@@ -59,6 +59,8 @@ public class StreamMessageImpl extends SequenceMessageImpl implements StreamMess
                 this.dataIn.reset();
                 throw new MessageFormatException(" not a double type");
             }
+        } catch (EOFException ex) {
+            throw JMSExceptionSupport.create(ex);
         } catch (IOException ex) {
             throw JMSExceptionSupport.create(ex);
         }
