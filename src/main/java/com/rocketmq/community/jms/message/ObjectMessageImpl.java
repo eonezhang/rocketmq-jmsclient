@@ -9,15 +9,11 @@ import javax.jms.ObjectMessage;
 import java.io.*;
 
 public class ObjectMessageImpl extends MessageBase implements ObjectMessage {
-    private byte[] content;
-
     public ObjectMessageImpl() {
-        this(null, false);
     }
 
     public ObjectMessageImpl(byte[] content, boolean readOnly) {
-        this.content = content;
-        this.readOnly = readOnly;
+        super(content, readOnly);
     }
 
     @Override
@@ -36,6 +32,7 @@ public class ObjectMessageImpl extends MessageBase implements ObjectMessage {
 
     @Override
     public void setObject(Serializable object) throws JMSException {
+        checkReadOnly();
         if (object != null) {
             content = RemotingSerializableEx.encodeWithClass(object);
         }
@@ -43,7 +40,14 @@ public class ObjectMessageImpl extends MessageBase implements ObjectMessage {
 
     @Override
     public Serializable getObject() throws JMSException {
-        Serializable object = RemotingSerializableEx.decode(content, Serializable.class);
+        Serializable object = null;
+        try {
+          object = RemotingSerializableEx.decode(content, Serializable.class);
+
+        } catch (Exception ex) {
+            JMSExceptionSupport.create(ex);
+        }
+
         return object;
     }
 

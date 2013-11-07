@@ -8,6 +8,7 @@ import com.alibaba.rocketmq.common.message.MessageQueue;
 import com.alibaba.rocketmq.remoting.protocol.RemotingSerializable;
 import com.rocketmq.community.jms.message.*;
 import com.rocketmq.community.jms.util.JMSExceptionSupport;
+import com.rocketmq.community.jms.util.RemotingSerializableEx;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -101,7 +102,7 @@ public class MQMessageConsumer implements MessageConsumer {
         return result;
     }
 
-    private Message convertToJmsMessage(MessageExt rawMessage) {
+    private Message convertToJmsMessage(MessageExt rawMessage) throws JMSException {
         String msgType = rawMessage.getProperty(MessageBase.MSG_TYPE_NAME);
         if (msgType == null || rawMessage.getBody() == null) {
             return null;
@@ -112,8 +113,7 @@ public class MQMessageConsumer implements MessageConsumer {
             String content = new String(rawMessage.getBody());
             message = new TextMessageImpl(content, true);
         } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.MapMessage.toString())) {
-            Map<String, Object> map = RemotingSerializable.decode(rawMessage.getBody(), HashMap.class);
-            message = new MapMessageImpl(map, true);
+            message = new MapMessageImpl(rawMessage.getBody(), true);
         } else if (msgType.equalsIgnoreCase(MessageBase.MessageTypeEnum.BytesMessage.toString())) {
             if (rawMessage.getBody() != null) {
                 message = new BytesMessageImpl(rawMessage.getBody(), true);

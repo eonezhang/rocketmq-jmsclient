@@ -4,12 +4,12 @@ import com.alibaba.rocketmq.common.message.Message;
 
 import javax.jms.BytesMessage;
 import javax.jms.JMSException;
+import java.io.IOException;
 
 public class BytesMessageImpl extends SequenceMessageImpl implements BytesMessage {
     private long length;
 
     public BytesMessageImpl() {
-        super(null, false);
     }
 
     public BytesMessageImpl(byte[] content, boolean readOnly) {
@@ -17,6 +17,7 @@ public class BytesMessageImpl extends SequenceMessageImpl implements BytesMessag
     }
 
     public long getBodyLength() throws JMSException {
+        initializeReading();
         return length;
     }
 
@@ -30,5 +31,14 @@ public class BytesMessageImpl extends SequenceMessageImpl implements BytesMessag
         if (content != null) {
             length = content.length;
         }
+    }
+
+    @Override
+    protected int getType() throws IOException {
+        return TYPE_NOT_AVAILABLE;
+    }
+
+    @Override
+    protected void preWriteProcess(Byte valueType) throws IOException {
     }
 }

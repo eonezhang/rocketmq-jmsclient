@@ -12,11 +12,8 @@ import com.rocketmq.community.jms.message.StreamMessageImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
-import org.springframework.test.context.ContextLoader;
-import org.springframework.test.context.support.GenericXmlContextLoader;
 
 import javax.jms.JMSException;
 import javax.jms.TextMessage;
@@ -51,7 +48,8 @@ public class TestJmsClient {
         Assert.assertEquals((short)producer.mapDeptIdValue, ((MapMessageImpl)messageListener.getMessage()).getShort(producer.mapDeptId));
         Assert.assertEquals(producer.mapSideValue, ((MapMessageImpl)messageListener.getMessage()).getString(producer.mapSide));
         Assert.assertEquals((long)producer.mapAcctIdValue, ((MapMessageImpl)messageListener.getMessage()).getLong(producer.mapAcctId));
-        Assert.assertEquals((double)producer.mapSharesValue, ((MapMessageImpl)messageListener.getMessage()).getDouble(producer.mapShares), 0);
+        Assert.assertEquals(producer.mapSharesValue, ((MapMessageImpl)messageListener.getMessage()).getDouble(producer.mapShares), 0);
+        Assert.assertEquals((char)producer.mapSexValue, ((MapMessageImpl)messageListener.getMessage()).getChar(producer.mapSex));
         Assert.assertNull(((MapMessageImpl)messageListener.getMessage()).getString("NONE"));
         Assert.assertEquals(0.0, ((MapMessageImpl)messageListener.getMessage()).getDouble("NONE"), 0);
 
@@ -61,8 +59,10 @@ public class TestJmsClient {
     public void TestSendBytesMessagge_MultiThread() throws JMSException {
         sendReceiveMessageMultiThread(MessageType.BytesMessage);
 
-        Assert.assertEquals((double) producer.double1, ((BytesMessageImpl) messageListener.getMessage()).readDouble(), 0);
-        Assert.assertEquals((double)producer.double2, ((BytesMessageImpl)messageListener.getMessage()).readDouble(), 0);
+        Assert.assertEquals(producer.double1, ((BytesMessageImpl) messageListener.getMessage()).readDouble(), 0);
+        Assert.assertEquals(producer.double2, ((BytesMessageImpl)messageListener.getMessage()).readDouble(), 0);
+        Assert.assertEquals(producer.character, ((BytesMessageImpl)messageListener.getMessage()).readChar());
+        Assert.assertEquals(producer.utf, ((BytesMessageImpl)messageListener.getMessage()).readUTF());
     }
 
     @Test
@@ -79,6 +79,7 @@ public class TestJmsClient {
 
         Assert.assertEquals(producer.testObject.value, ((TestObject)((ObjectMessageImpl)messageListener.getMessage()).getObject()).value, 0);
         Assert.assertEquals(producer.testObject.name, ((TestObject)((ObjectMessageImpl)messageListener.getMessage()).getObject()).name);
+        Assert.assertEquals(producer.testObject.character, ((TestObject) ((ObjectMessageImpl)messageListener.getMessage()).getObject()).character);
     }
 
     private void sendReceiveMessageMultiThread(final MessageType msgType) {

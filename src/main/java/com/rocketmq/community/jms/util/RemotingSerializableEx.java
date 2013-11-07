@@ -13,4 +13,8 @@ public class RemotingSerializableEx extends RemotingSerializable {
         }
         return null;
     }
+
+    public static String toJsonWithClass(final Object obj) {
+        return JSON.toJSONString(obj, SerializerFeature.WriteClassName);
+    }
 }

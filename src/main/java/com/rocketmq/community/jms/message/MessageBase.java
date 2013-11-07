@@ -1,16 +1,52 @@
 package com.rocketmq.community.jms.message;
 
 import com.alibaba.rocketmq.common.message.Message;
+import com.rocketmq.community.jms.util.RemotingSerializableEx;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
+import javax.jms.MessageNotWriteableException;
 import java.util.Enumeration;
 
 public abstract class MessageBase implements javax.jms.Message {
+    public static final byte NULL = 0;
+    public static final byte BOOLEAN_TYPE = 1;
+    public static final byte BYTE_TYPE = 2;
+    public static final byte CHAR_TYPE = 3;
+    public static final byte SHORT_TYPE = 4;
+    public static final byte INTEGER_TYPE = 5;
+    public static final byte LONG_TYPE = 6;
+    public static final byte DOUBLE_TYPE = 7;
+    public static final byte FLOAT_TYPE = 8;
+    public static final byte STRING_TYPE = 9;
+    public static final byte BYTE_ARRAY_TYPE = 10;
+    public static final byte MAP_TYPE = 11;
+    public static final byte LIST_TYPE = 12;
+    public static final byte BIG_STRING_TYPE = 13;
+    protected static final int TYPE_NOT_AVAILABLE = -100;
+
     private Destination destination;
     final static public String JMS_SOURCE = "JMS_SOURCE";
     final static public String MSG_TYPE_NAME = "MSG_TYPE";
     protected boolean readOnly;
+
+    protected byte[] content;
+
+    protected MessageBase() {
+    }
+
+    protected MessageBase(byte[] content, Boolean readOnly) {
+        this.content = content;
+        this.readOnly = readOnly;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public byte[] getContent() {
+        return content;
+    }
 
     @Override
     public String getJMSMessageID() throws JMSException {
@@ -237,6 +273,13 @@ public abstract class MessageBase implements javax.jms.Message {
         readOnly = false;
     }
 
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
     public abstract Message convert() throws JMSException ;
 
     public enum MessageTypeEnum {
@@ -246,4 +289,16 @@ public abstract class MessageBase implements javax.jms.Message {
         ObjectMessage,
         BytesMessage
     }
+
+    protected void checkReadOnly() throws MessageNotWriteableException {
+        if (readOnly) {
+            throw new MessageNotWriteableException("Message body is read-only");
+        }
+    }
+
+    public MessageBase copy() {
+        String json = RemotingSerializableEx.toJsonWithClass(this);
+        return RemotingSerializableEx.fromJson(json, this.getClass());
+    }
 }
+

@@ -18,9 +18,15 @@ public class JmsProducer {
     public final Double mapSharesValue = 250.0;
     public final String mapDeptId = "deptId";
     public final Short mapDeptIdValue = 111;
+    public final String mapByteArray = "byteArray";
+    public final byte[] mapByteArrayValue = new byte[1];
+    public final String mapSex = "sex";
+    public final Character mapSexValue = 'M';
 
     public final Double double1 = 11.0;
     public final Double double2 = 12.33;
+    public final char character = 'C';
+    public final String utf = "This is A test &&||";
 
     public final TestObject testObject = new TestObject();
 
@@ -44,6 +50,8 @@ public class JmsProducer {
                 msg.setString(mapSide, mapSideValue);
                 msg.setDouble(mapShares, mapSharesValue);
                 msg.setShort(mapDeptId, mapDeptIdValue);
+                msg.setBytes(mapByteArray, mapByteArrayValue);
+                msg.setChar(mapSex, mapSexValue);
                 return msg;
             }
         };
@@ -57,6 +65,8 @@ public class JmsProducer {
                 BytesMessage msg = session.createBytesMessage();
                 msg.writeDouble(double1);
                 msg.writeDouble(double2);
+                msg.writeChar(character);
+                msg.writeUTF(utf);
                 return msg;
             }
         };

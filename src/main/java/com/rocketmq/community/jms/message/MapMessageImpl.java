@@ -1,12 +1,14 @@
 package com.rocketmq.community.jms.message;
 
+import com.alibaba.fastjson.util.TypeUtils;
 import com.alibaba.rocketmq.common.message.Message;
-import com.alibaba.rocketmq.remoting.protocol.RemotingSerializable;
+import com.rocketmq.community.jms.util.JMSExceptionSupport;
 import com.rocketmq.community.jms.util.RemotingSerializableEx;
 
 import javax.jms.JMSException;
 import javax.jms.MapMessage;
 import javax.jms.MessageFormatException;
+import javax.jms.MessageNotWriteableException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -16,12 +18,19 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
     protected Map<String, Object> map = new HashMap<String, Object>();
 
     public MapMessageImpl() {
-
     }
 
-    public MapMessageImpl(Map<String, Object> map, boolean readOnly) {
-        this.readOnly = readOnly;
-        this.map = map;
+    public MapMessageImpl(byte[] content, boolean readOnly) throws JMSException {
+        super(content, readOnly);
+        try {
+            map = RemotingSerializableEx.decode(content, HashMap.class);
+        } catch (Exception ex) {
+            throw JMSExceptionSupport.create(ex);
+        }
+    }
+
+    public Map<String, Object> getMap() {
+        return map;
     }
 
     @Override
@@ -81,10 +90,11 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
         if (value == null) {
             throw new NullPointerException();
         }
-        if (value instanceof Character) {
-            return ((Character)value).charValue();
-        } else {
-            throw new MessageFormatException(" cannot read a short from " + value.getClass().getName());
+
+        try {
+            return TypeUtils.castToChar(((PrimitiveTypeWrapper) value).getObject());
+        } catch (Exception ex) {
+            throw JMSExceptionSupport.create(ex);
         }
     }
 
@@ -186,16 +196,25 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
     @Override
     public byte[] getBytes(String name) throws JMSException {
         Object value = map.get(name);
-        if (value instanceof byte[]) {
-            return (byte[])value;
-        } else {
-            throw new MessageFormatException(" cannot read a byte[] from " + value.getClass().getName());
+        try {
+            return TypeUtils.castToBytes(((PrimitiveTypeWrapper) value).getObject());
+        } catch (Exception ex) {
+            throw JMSExceptionSupport.create(ex);
         }
     }
 
     @Override
     public Object getObject(String name) throws JMSException {
         Object result = map.get(name);
+
+        if (result instanceof PrimitiveTypeWrapper) {
+            PrimitiveTypeWrapper wrapper = (PrimitiveTypeWrapper)result;
+            if (wrapper.getObjectType() == MessageBase.BYTE_ARRAY_TYPE) {
+                result = TypeUtils.castToBytes(wrapper.getObject());
+            } else if (wrapper.getObjectType() == MessageBase.CHAR_TYPE) {
+                result = TypeUtils.castToChar(wrapper.getObject());
+            }
+        }
         return result;
     }
 
@@ -206,53 +225,63 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
 
     @Override
     public void setBoolean(String name, boolean value) throws JMSException {
+        initializeWriting();
         put(name, value ? Boolean.TRUE : Boolean.FALSE);
     }
 
     @Override
     public void setByte(String name, byte value) throws JMSException {
+        initializeWriting();
         put(name, Byte.valueOf(value));
     }
 
     @Override
     public void setShort(String name, short value) throws JMSException {
+        initializeWriting();
         put(name, Short.valueOf(value));
     }
 
     @Override
     public void setChar(String name, char value) throws JMSException {
-        put(name, Character.valueOf(value));
+        initializeWriting();
+        put(name, new PrimitiveTypeWrapper(Character.valueOf(value)));
     }
 
     @Override
     public void setInt(String name, int value) throws JMSException {
+        initializeWriting();
         put(name, Integer.valueOf(value));
     }
 
     @Override
     public void setLong(String name, long value) throws JMSException {
+        initializeWriting();
         put(name, Long.valueOf(value));
     }
 
     @Override
     public void setFloat(String name, float value) throws JMSException {
+        initializeWriting();
         put(name, new Float(value));
     }
 
     @Override
     public void setDouble(String name, double value) throws JMSException {
+        initializeWriting();
         put(name, new Double(value));
     }
 
     @Override
     public void setString(String name, String value) throws JMSException {
+        initializeWriting();
         put(name, value);
     }
 
     @Override
     public void setBytes(String name, byte[] value) throws JMSException {
+        initializeWriting();
         if (value != null) {
-            put(name, value);
+            put(name, new PrimitiveTypeWrapper(value));
         } else {
             map.remove(name);
         }
@@ -260,17 +289,24 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
 
     @Override
     public void setBytes(String name, byte[] value, int offset, int length) throws JMSException {
+        initializeWriting();
         byte[] data = new byte[length];
         System.arraycopy(value, offset, data, 0, length);
-        put(name, data);
+        put(name, new PrimitiveTypeWrapper(data));
     }
 
     @Override
     public void setObject(String name, Object value) throws JMSException {
+        initializeWriting();
         if (value != null) {
             // byte[] not allowed on properties
             if (!(value instanceof byte[])) {
                 checkValidObject(value);
+                if (value instanceof Character) {
+                    value = new PrimitiveTypeWrapper(value);
+                }
+            } else {
+                value = new PrimitiveTypeWrapper(value);
             }
             put(name, value);
         } else {
@@ -286,7 +322,7 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
     @Override
     public void clearBody() throws JMSException {
         super.clearBody();
-        map = null;
+        map.clear();
     }
 
     @Override
@@ -316,5 +352,10 @@ public class MapMessageImpl extends MessageBase implements MapMessage{
         if (!valid) {
             throw new MessageFormatException("Only objectified primitive objects and String types are allowed but was: " + value + " type: " + value.getClass());
         }
+    }
+
+    private void initializeWriting() throws MessageNotWriteableException {
+        checkReadOnly();
+        setContent(null);
     }
 }
